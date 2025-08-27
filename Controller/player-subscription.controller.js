@@ -1,8 +1,8 @@
-const GymPlayerPlan = require("../../Model/Client/GymPlayerSubscriptionModel")
+const GymPlayerPlan = require("../Model/GymPlayerSubscriptionModel")
 
 const createGymPlayerPlan = async (req, res) => {
   try {
-    const { gymId, planName, durationInMonths, price, features, status } = req.body;
+    const { gymId, planName, durationInMonths, price, features, status,planType} = req.body;
 
     if (!gymId || !planName || !durationInMonths || !price) {
       return res.status(400).json({ message: "gymId, planName, durationInMonths, and price are required" });
@@ -14,6 +14,7 @@ const createGymPlayerPlan = async (req, res) => {
       durationInMonths,
       price,
       features,
+      planType,
       status,
     });
 
@@ -33,15 +34,15 @@ const createGymPlayerPlan = async (req, res) => {
 
 const updateGymPlayerPlan = async (req, res) => {
   try {
-    const { id, gymId, planName, durationInMonths, price, features, status } = req.body;
+    const { _id, gymId, planName, durationInMonths, price, features, status, planType } = req.body;
 
-    if (!id) {
+    if (!_id) {
       return res.status(400).json({ message: "Plan ID is required" });
     }
 
     const updatedPlan = await GymPlayerPlan.findByIdAndUpdate(
-      id,
-      { gymId, planName, durationInMonths, price, features, status },
+      _id,
+      { gymId, planName, durationInMonths, price, features, status, planType },
       { new: true, runValidators: true }
     );
 
@@ -60,11 +61,15 @@ const updateGymPlayerPlan = async (req, res) => {
 };
 
 
-const getGymPlayerPlans = async (req, res) => {
+const getGymPlayerPlansByGymid = async (req, res) => {
   try {
-    const { gymId } = req.body;
+    const { gymId } = req.query; // get gymId from query param
 
-    const plans = await GymPlayerPlan.find({ gymId }).sort({ price: 1 });
+    if (!gymId) {
+      return res.status(400).json({ message: "gymId is required" });
+    }
+
+    const plans = await GymPlayerPlan.find({ gymId }).populate("gymId").sort({ price: 1 });
 
     res.status(200).json(plans);
   } catch (error) {
@@ -76,6 +81,6 @@ const getGymPlayerPlans = async (req, res) => {
 
 module.exports={
     createGymPlayerPlan,
-    getGymPlayerPlans,
+    getGymPlayerPlansByGymid,
     updateGymPlayerPlan
 }

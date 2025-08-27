@@ -20,6 +20,10 @@ const GymPlayerPlanSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    planType:{
+      type: String,
+      required: true,
+    },
     features: [
       {
         type: String, // e.g., "Personal Trainer", "Steam Bath", "Diet Consultation"
@@ -27,8 +31,8 @@ const GymPlayerPlanSchema = new mongoose.Schema(
     ],
     status: {
       type: String,
-      enum: ["active", "inactive"],
-      default: "active",
+      required: true,
+
     },
   },
   { timestamps: true }
