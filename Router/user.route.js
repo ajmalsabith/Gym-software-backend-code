@@ -1,8 +1,8 @@
 const express = require('express')
 const userRouter= express()
-const UserController= require('../Controller/Client/UserController')
-const MembershipPlansController= require('../Controller/Client/GymPlayerSubscriptionController')
-const GymController= require('../Controller/Admin/gymController')
+const MembershipPlansController= require('../Controller/player-subscription.controller')
+const GymController= require('../Controller/gym.controller')
+const UserController= require('../Controller/user.controller')
 
 
 

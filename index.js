@@ -3,13 +3,15 @@ const mongoose= require('mongoose')
 const express=require('express')
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
-const userRouter= require('./Router/userRouter')
-const adminRouter= require('./Router/adminRouter')
+const userRouter= require('./Router/user.route')
+const adminRouter= require('./Router/admin.route')
 const apiauth= require('./Auth/apiAuth');
-const CommonApiRoutes = require('./Router/CommonRoutesApis');
+const CommonApiRoutes = require('./Router/common.route');
 const app=express()
 const bodyParser = require("body-parser");
 const authenticateToken = require('./Auth/tokenAuth');
+
+const gymOwnerRouter = require('./Router/gym-owner.route');
 
 
 app.use(cors({
@@ -36,6 +38,7 @@ app.use('/client',(req, res, next) => {
 
 app.use('/admin', apiauth, adminRouter);
 app.use('/common', apiauth, CommonApiRoutes);
+app.use('/gym-owner', gymOwnerRouter  );
 
 
 mongoose.connect(process.env.mongodburinew)

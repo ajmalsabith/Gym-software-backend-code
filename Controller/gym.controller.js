@@ -1,4 +1,4 @@
-const Gym= require('../../Model/Admin/gymModel')
+const Gym= require('../Model/gymModel')
 
 const InsertGym = async (req, res) => {
   try {

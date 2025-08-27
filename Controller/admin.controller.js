@@ -1,13 +1,12 @@
 
-const Admin = require("../../Model/Admin/AdminModel");
+const Admin = require("../Model/AdminModel");
 const jwt = require("jsonwebtoken");
 
 const AdminLogin = async (req, res) => {
     try {
     const { username, password } = req.body;
 
-    
-
+  
     // 1️⃣ Check if admin exists
     const admin = await Admin.findOne({ username });
     if (!admin) {

@@ -2,7 +2,7 @@ const SubscriptionPlan = require("../../Model/Admin/SubscriptionModel");
 
 const createSubscriptionPlan = async (req, res) => {
   try {
-    const { planName, durationInMonths, price, features , status} = req.body;
+    const { planName, durationInMonths, price, features, status } = req.body;
 
     if (!planName || !durationInMonths || !price) {
       return res.status(400).json({ message: "Plan name, duration, and price are required" });
@@ -58,16 +58,16 @@ const updateSubscriptionPlan = async (req, res) => {
 };
 
 
-const GetSubscrioptionPlans = async (req,res)=>{
-    try {
-        
-        const Plans = await SubscriptionPlan.find({})
+const GetSubscrioptionPlans = async (req, res) => {
+  try {
 
-        res.status(200).json({Plans})
+    const Plans = await SubscriptionPlan.find({})
 
-    } catch (error) {
-            res.status(500).json({ message: "Error fetching Plans list", error: error.message });
-    }
+    res.status(200).json({ Plans })
+
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching Plans list", error: error.message });
+  }
 }
 
 
@@ -93,9 +93,9 @@ const GetSubscrioptionPlansById = async (req, res) => {
 };
 
 
-module.exports={
-    createSubscriptionPlan,
-    updateSubscriptionPlan,
-    GetSubscrioptionPlans,
-    GetSubscrioptionPlansById
+module.exports = {
+  createSubscriptionPlan,
+  updateSubscriptionPlan,
+  GetSubscrioptionPlans,
+  GetSubscrioptionPlansById
 }

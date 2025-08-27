@@ -1,4 +1,4 @@
-const GymPlayerPlan = require("../../Model/Client/GymPlayerSubscriptionModel")
+const GymPlayerPlan = require("../Model/GymPlayerSubscriptionModel")
 
 const createGymPlayerPlan = async (req, res) => {
   try {
