@@ -87,9 +87,13 @@ const InsertUser = async (req, res) => {
     
 
     const savedUser = await user.save();
+    console.log(savedUser);
+    
     res.status(201).json({ message: "User inserted successfully", user: savedUser });
 
   } catch (error) {
+    console.log(error);
+    
     res.status(500).json({ message: "Error inserting user", error: error.message });
   }
 };
@@ -97,11 +101,11 @@ const InsertUser = async (req, res) => {
 // ✅ Update User
 const EditUser = async (req, res) => {
   try {
-    const userId = req.body.id;
+    const userid = req.body.id;
     const data = req.body.obj;
 
     const result = await User.updateOne(
-      { userId },
+      { userid },
       { $set: data },
       { runValidators: true }
     );
@@ -179,7 +183,7 @@ const ClientLoginWeb = async (req, res) => {
     const tokens = generateTokens({ id:admin._id, email:admin.email});
 
 
-    res.json({ message: "Login successful",tokens:tokens, Role:"Client"});
+    res.json({ message: "Login successful",tokens:tokens,Role:admin.role,Gymid:admin.gymId,UserId:admin._id});
   } catch (error) {
     console.log(error);
     
@@ -187,11 +191,33 @@ const ClientLoginWeb = async (req, res) => {
   }
  
 }
+
+
+const getGymPlayersListByGymid = async (req, res) => {
+  try {
+    const { gymId } = req.query; // get gymId from query param
+
+    if (!gymId) {
+      return res.status(400).json({ message: "gymId is required" });
+    }
+
+    const plans = await User.find({ gymId }).populate("gymId").sort({ price: 1 });
+
+    res.status(200).json(plans);
+  } catch (error) {
+    console.error("Error fetching players:", error);
+    res.status(500).json({ message: "Error fetching Plyers List", error: error.message });
+  }
+};
+
+
+
 module.exports = { 
     InsertUser,
      EditUser, 
      GetUserList,
      GetUserById,
      ClientLoginWeb,
+     getGymPlayersListByGymid,
      refreshToken
  };
