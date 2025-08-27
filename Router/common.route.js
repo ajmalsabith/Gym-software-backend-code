@@ -1,8 +1,8 @@
 // routes/location.routes.js
 const express = require('express');
 const CommonApiRoutes = express.Router();
-const StateDistricts = require('../Model/Admin/StatesDistrictsModel');
-const IndiaCities = require('../Model/Admin/IndiaCitiesModel');
+const StateDistricts = require('../Model/StatesDistrictsModel');
+const IndiaCities = require('../Model/IndiaCitiesModel');
 
 // GET all states with districts
 CommonApiRoutes.get('/states-districts', async (req, res) => {

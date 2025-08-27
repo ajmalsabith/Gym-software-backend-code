@@ -1,8 +1,5 @@
-const User = require("../../Model/Client/UserModel");
+const User = require("../Model/UserModel");
 const jwt = require("jsonwebtoken");
-
-
-
 
 const JWT_SECRET =process.env.AccessSecret;    
 const REFRESH_SECRET = process.env.RefreshSecret;  
