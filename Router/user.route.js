@@ -7,6 +7,7 @@ const UserController= require('../Controller/user.controller')
 
 
 
+
 userRouter.post('/login',UserController.ClientLoginWeb)
 
 // admin 
@@ -26,7 +27,7 @@ userRouter.get('/get-membership-plans',MembershipPlansController.getGymPlayerPla
 
 
 // token 
-userRouter.get('/refresh-token',UserController.refreshToken)
+userRouter.post('/refresh-token',UserController.refreshToken)
 
 
 

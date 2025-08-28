@@ -9,7 +9,7 @@ function authenticateToken(req, res, next) {
   if (!token) return res.sendStatus(401);
 
   jwt.verify(token, JWT_SECRET, (err, user) => {
-    if (err) return res.sendStatus(403); // token invalid/expired
+    if (err) return res.sendStatus(403); // token invalid/expired    
     req.user = user;
     next();
   });

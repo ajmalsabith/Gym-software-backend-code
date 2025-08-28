@@ -28,9 +28,6 @@ const refreshToken = (req, res) => {
   if (!refresh) {
     return res.status(401).json({ message: "Refresh token required" });
   }
-  if (!refreshTokens.includes(refresh)) {
-    return res.status(403).json({ message: "Invalid refresh token" });
-  }
 
   jwt.verify(refresh, REFRESH_SECRET, (err, user) => {
     if (err) return res.status(403).json({ message: "Token expired" });
@@ -80,7 +77,7 @@ const InsertUser = async (req, res) => {
       gymId: data.gymId,
     });
 
-    console.log(user,'userobj');
+    // console.log(user,'userobj');
     
 
     const savedUser = await user.save();
@@ -98,11 +95,13 @@ const InsertUser = async (req, res) => {
 // ✅ Update User
 const EditUser = async (req, res) => {
   try {
+
+    
     const userid = req.body.id;
     const data = req.body.obj;
 
     const result = await User.updateOne(
-      { userid },
+      { userId:userid},
       { $set: data },
       { runValidators: true }
     );
@@ -117,6 +116,8 @@ const EditUser = async (req, res) => {
 
     res.status(200).json({ message: "User updated successfully" });
   } catch (error) {
+    console.log(error);
+    
     res.status(500).json({ message: "Error updating user", error: error.message });
   }
 };
