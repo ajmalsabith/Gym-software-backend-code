@@ -1,34 +1,24 @@
 const express = require('express')
 const userRouter= express()
-const MembershipPlansController= require('../Controller/player-subscription.controller')
 const GymController= require('../Controller/gym.controller')
 const UserController= require('../Controller/user.controller')
 
-
-
-
-
+// Client Authentication
 userRouter.post('/login',UserController.ClientLoginWeb)
 
-// admin 
+// Admin Routes
 userRouter.get('/get-gymlist',GymController.GetGymList)
-// users
+
+// User Management
 userRouter.post('/insertuser',UserController.InsertUser)
 userRouter.post('/updateuser',UserController.EditUser)
 userRouter.get('/get-userlist',UserController.GetUserList)
 userRouter.get('/get-players-listbygymid',UserController.getGymPlayersListByGymid)
 
-// membership plans
+// Note: Membership plans functionality has been moved to gym-owner routes
+// Use /gym-owner/subscriptions for subscription management
 
-userRouter.post('/insert-membership-plans',MembershipPlansController.createGymPlayerPlan)
-userRouter.post('/update-membership-plans',MembershipPlansController.updateGymPlayerPlan)
-userRouter.get('/get-membership-plans',MembershipPlansController.getGymPlayerPlansByGymid)
-
-
-
-// token 
-userRouter.post('/refresh-token',UserController.refreshToken)
-
-
+// Token Management
+userRouter.get('/refresh-token',UserController.refreshToken)
 
 module.exports = userRouter
