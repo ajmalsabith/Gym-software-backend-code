@@ -1,8 +1,8 @@
 const User = require("../Model/UserModel");
 const jwt = require("jsonwebtoken");
 
-const JWT_SECRET =process.env.AccessSecret;    
-const REFRESH_SECRET = process.env.RefreshSecret;  
+const JWT_SECRET = process.env.AccessSecret || 'fallback_secret_key_for_development';    
+const REFRESH_SECRET = process.env.RefreshSecret || 'fallback_refresh_secret_key_for_development';  
 
 // Generate tokens
 function generateTokens(user) {
@@ -154,6 +154,39 @@ const GetUserById = async (req, res) => {
 
 
 
+const TrainerLogin = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: "Email and password are required" });
+    }
+
+    const user = await User.findOne({ email }).populate('gymId');
+    if (!user) {
+      return res.status(400).json({ success: false, message: "User not found" });
+    }
+
+    if (user.role !== 'trainer') {
+      return res.status(403).json({ success: false, message: "This user doesn't have trainer access" });
+    }
+
+    if (user.password !== password) {
+      return res.status(400).json({ success: false, message: "Invalid password" });
+    }
+
+    const tokens = generateTokens({ id: user._id, email: user.email });
+
+    return res.json({ 
+      success: true, 
+      token: tokens.accessToken,
+      gym: user.gymId 
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Server error", error: error.message });
+  }
+};
+
 const ClientLoginWeb = async (req, res) => {
     try {
     const { email, password } = req.body;
@@ -198,12 +231,115 @@ const getGymPlayersListByGymid = async (req, res) => {
       return res.status(400).json({ message: "gymId is required" });
     }
 
-    const plans = await User.find({ gymId }).populate("gymId").sort({ price: 1 });
+    const players = await User.find({ gymId, role: "player" })
+      .populate("gymId", "name gymId city state")
+      .populate("subscriptionId", "planName planType price duration")
+      .sort({ createdAt: -1 });
 
-    res.status(200).json(plans);
+    res.status(200).json({ success: true, players });
   } catch (error) {
     console.error("Error fetching players:", error);
-    res.status(500).json({ message: "Error fetching Plyers List", error: error.message });
+    res.status(500).json({ message: "Error fetching Players List", error: error.message });
+  }
+};
+
+// ✅ Create Gym Player with Subscription
+const createGymPlayer = async (req, res) => {
+  try {
+    const data = req.body;
+
+    // Validate required fields
+    if (!data.name || !data.email || !data.phone || !data.gymId || !data.subscriptionId) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "name, email, phone, gymId, and subscriptionId are required" 
+      });
+    }
+
+    // Check if email already exists
+    const existingUser = await User.findOne({ email: data.email });
+    if (existingUser) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "User with this email already exists" 
+      });
+    }
+
+    // Get subscription details to set dates and status
+    const subscription = await require("../Model/TrainerSubscriptionModel").findById(data.subscriptionId);
+    if (!subscription) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Invalid subscription ID" 
+      });
+    }
+
+    // Generate next userId
+    const lastUser = await User.findOne().sort({ createdAt: -1 }).exec();
+    let nextUserId = "USER1";
+
+    if (lastUser?.userId) {
+      const lastUserNumber = parseInt(lastUser.userId.replace("USER", ""), 10) || 0;
+      nextUserId = `USER${lastUserNumber + 1}`;
+    }
+
+    // Calculate age from DOB if provided
+    let age = null;
+    if (data.dob) {
+      const birthDate = new Date(data.dob);
+      const today = new Date();
+      age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+    }
+
+    const user = new User({
+      userId: nextUserId,
+      role: "player",
+      name: data.name,
+      email: data.email,
+      password: data.password || "defaultPassword123", // You may want to generate a random password
+      phone: data.phone,
+      age: age || data.age,
+      gender: data.gender,
+      dob: data.dob ? new Date(data.dob) : null,
+      line1: data?.line1,
+      city: data?.city,
+      district: data?.district,
+      state: data?.state,
+      country: data?.country,
+      zip: data?.zip,
+      gymId: data.gymId,
+      subscriptionId: data.subscriptionId,
+      subscriptionStatus: subscription.status,
+      subscriptionStartDate: subscription.startDate,
+      subscriptionEndDate: subscription.endDate,
+      IsStatus: data?.IsStatus || "active",
+      photo: data?.photo,
+    });
+
+    const savedUser = await user.save();
+    
+    // Populate the saved user with gym and subscription details
+    const populatedUser = await User.findById(savedUser._id)
+      .populate("gymId", "name gymId city state")
+      .populate("subscriptionId", "planName planType price duration");
+
+    res.status(201).json({ 
+      success: true, 
+      message: "Gym player created successfully", 
+      player: populatedUser 
+    });
+
+  } catch (error) {
+    console.error("Error creating gym player:", error);
+    res.status(500).json({ 
+      success: false, 
+      message: "Error creating gym player", 
+      error: error.message 
+    });
   }
 };
 
@@ -215,6 +351,8 @@ module.exports = {
      GetUserList,
      GetUserById,
      ClientLoginWeb,
+     TrainerLogin,
      getGymPlayersListByGymid,
+     createGymPlayer,
      refreshToken
  };

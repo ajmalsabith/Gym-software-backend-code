@@ -12,17 +12,22 @@ const bodyParser = require("body-parser");
 const authenticateToken = require('./Auth/tokenAuth');
 
 const gymOwnerRouter = require('./Router/gym-owner.route');
+const uploadRouter = require('./Router/upload.route');
 
 
 app.use(cors({
-    credentials:true,
-    origin:['http://localhost:4200','http://localhost:4100']
+    origin:true,
+    credentials:true
 }))
+app.options('*', cors())
 
 
 
 app.use(cookieParser());
 app.use(express.json());
+
+// Serve uploaded images statically
+app.use('/uploads', express.static('uploads'));
 
 
 
@@ -32,13 +37,14 @@ app.use('/client',(req, res, next) => {
       return next(); // skip 
     }
     authenticateToken(req, res, next);
-  },
+  },  
   userRouter
 );
 
-app.use('/admin', apiauth, adminRouter);
+app.use('/admin', adminRouter);
 app.use('/common', apiauth, CommonApiRoutes);
 app.use('/gym-owner', gymOwnerRouter  );
+app.use('/upload', uploadRouter);
 
 
 mongoose.connect(process.env.mongodburinew)

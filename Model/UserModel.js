@@ -4,10 +4,10 @@ const userSchema = new mongoose.Schema(
   {
     role: {
       type: String,
-      enum: ["player", "trainer", "admin"],
+      enum: ["player", "trainer"],
       required: true,
     },
-     userId: {
+    userId: {
       type: String,
       required: true,
     },
@@ -30,7 +30,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-
+    age: {
+      type: Number,
+      min: 0,
+      max: 120,
+    },
     gender: {
       type: String,
       enum: ["male", "female", "other"],
@@ -38,15 +42,30 @@ const userSchema = new mongoose.Schema(
     dob: {
       type: Date,
     },
-      line1: { type: String },
-      city: { type: String },
-      district: { type: String },
-      state: { type: String },
-      country: { type: String },
-      zip: { type: String },
+    line1: { type: String },
+    city: { type: String },
+    district: { type: String },
+    state: { type: String },
+    country: { type: String },
+    zip: { type: String },
     gymId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Gym",
+    },
+    subscriptionId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "TrainerSubscription",
+    },
+    subscriptionStatus: {
+      type: String,
+      enum: ["active", "expired", "cancelled", "pending"],
+      default: "pending",
+    },
+    subscriptionStartDate: {
+      type: Date,
+    },
+    subscriptionEndDate: {
+      type: Date,
     },
     IsStatus: {
       type: String,
