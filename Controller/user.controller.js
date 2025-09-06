@@ -4,12 +4,15 @@ const jwt = require("jsonwebtoken");
 const JWT_SECRET = process.env.AccessSecret || 'fallback_secret_key_for_development';    
 const REFRESH_SECRET = process.env.RefreshSecret || 'fallback_refresh_secret_key_for_development';  
 
+// Store refresh tokens (In production, use database or Redis)
+const refreshTokens = {};
+
 // Generate tokens
 function generateTokens(user) {
   const accessToken = jwt.sign(
     { id: user.id, email: user.email },
     JWT_SECRET,
-    { expiresIn: "15m" } // short expiry
+    { expiresIn: "30m" } // short expiry
   );
 
   const refreshToken = jwt.sign(
@@ -23,28 +26,41 @@ function generateTokens(user) {
 }
 
 const refreshToken = (req, res) => {
-  const { refresh } = req.body;
+  const { refreshToken: token } = req.body;
 
-  if (!refresh) {
-    return res.status(401).json({ message: "Refresh token required" });
+  if (!token) {
+    return res.status(401).json({ success: false, message: "Refresh token required" });
   }
 
-  jwt.verify(refresh, REFRESH_SECRET, (err, user) => {
-    if (err) return res.status(403).json({ message: "Token expired" });
+  // Check if token exists in our storage
+  const userId = Object.keys(refreshTokens).find(key => refreshTokens[key] === token);
+  if (!userId) {
+    return res.status(403).json({ success: false, message: "Invalid refresh token" });
+  }
 
-    const accessToken = jwt.sign(
+  jwt.verify(token, REFRESH_SECRET, (err, user) => {
+    if (err) {
+      // Remove invalid token from storage
+      delete refreshTokens[userId];
+      return res.status(403).json({ success: false, message: "Token expired or invalid" });
+    }
+
+    const newAccessToken = jwt.sign(
       { id: user.id, email: user.email },
       JWT_SECRET,
       { expiresIn: "15m" }
     );
 
-    return res.json({ access: accessToken });
+    return res.json({ 
+      success: true, 
+      accessToken: newAccessToken 
+    });
   });
 };
 
 
-// ✅ Insert User
-const InsertUser = async (req, res) => {
+// ✅ Insert User (Gym Admin)
+const InsertGymAdminUser = async (req, res) => {
   try {
     const data = req.body;
 
@@ -155,7 +171,7 @@ const GetUserById = async (req, res) => {
 
 
 
-const TrainerLogin = async (req, res) => {
+const GymAdminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -168,7 +184,7 @@ const TrainerLogin = async (req, res) => {
       return res.status(400).json({ success: false, message: "User not found" });
     }
 
-    if (user.role !== 'trainer') {
+    if (user.role !== 'admin') {
       return res.status(403).json({ success: false, message: "This user doesn't have trainer access" });
     }
 
@@ -178,10 +194,19 @@ const TrainerLogin = async (req, res) => {
 
     const tokens = generateTokens({ id: user._id, email: user.email });
 
+    // Store refresh token (in production, store in database)
+    refreshTokens[user._id] = tokens.refreshToken;
+
     return res.json({ 
       success: true, 
-      token: tokens.accessToken,
-      gym: user.gymId 
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      user: {
+        id: user._id,
+        email: user.email,
+        role: user.role,
+        gym: user.gymId
+      }
     });
   } catch (error) {
     return res.status(500).json({ success: false, message: "Server error", error: error.message });
@@ -201,9 +226,9 @@ const ClientLoginWeb = async (req, res) => {
     }else{
       console.log(admin);
       
-      if(admin?.role!="admin"){
-         return res.status(400).json({ message: "This user don't have login access" });
-      }
+      // if(admin?.role!="admin"){
+      //    return res.status(400).json({ message: "This user don't have login access" });
+      // }
     }
 
     // 2️⃣ Check password
@@ -267,7 +292,7 @@ const createGymPlayer = async (req, res) => {
     }
 
     // Get subscription details to set dates and status
-    const subscription = await require("../Model/TrainerSubscriptionModel").findById(data.subscriptionId);
+    const subscription = await require("../Model/PlayerSubscriptionModel").findById(data.subscriptionId);
     if (!subscription) {
       return res.status(400).json({ 
         success: false, 
@@ -344,16 +369,60 @@ const createGymPlayer = async (req, res) => {
   }
 };
 
+// Logout function to revoke refresh token
+const logout = (req, res) => {
+  const { refreshToken: token } = req.body;
+  
+  if (!token) {
+    return res.status(400).json({ success: false, message: "Refresh token required" });
+  }
 
+  // Find and remove the token from storage
+  const userId = Object.keys(refreshTokens).find(key => refreshTokens[key] === token);
+  if (userId) {
+    delete refreshTokens[userId];
+  }
+
+  return res.json({ success: true, message: "Logged out successfully" });
+};
+
+// Get current user profile
+const getCurrentUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.userId)
+      .populate('gymId', 'name gymId city state')
+      .select('-password'); // Exclude password from response
+
+    if (!user) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "User not found" 
+      });
+    }
+
+    return res.json({ 
+      success: true, 
+      user: user 
+    });
+  } catch (error) {
+    return res.status(500).json({ 
+      success: false, 
+      message: "Error fetching user profile", 
+      error: error.message 
+    });
+  }
+};
 
 module.exports = { 
-    InsertUser,
+    InsertGymAdminUser,
      EditUser, 
      GetUserList,
      GetUserById,
      ClientLoginWeb,
-     TrainerLogin,
+     GymAdminLogin,
      getGymPlayersListByGymid,
      createGymPlayer,
-     refreshToken
+     refreshToken,
+     logout,
+     getCurrentUser
  };
