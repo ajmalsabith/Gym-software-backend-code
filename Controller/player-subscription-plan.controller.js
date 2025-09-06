@@ -1,7 +1,7 @@
-const TrainerSubscription = require("../Model/TrainerSubscriptionModel");
+const PlayersSubcriptionModel = require("../Model/PlayerSubscriptionModel");
 
 // ✅ Create Trainer Subscription
-const createTrainerSubscription = async (req, res) => {
+const createPlayersSubcriptionPlan = async (req, res) => {
   try {
     const data = req.body;
 
@@ -25,9 +25,9 @@ const createTrainerSubscription = async (req, res) => {
     }
 
     // Generate subscription ID
-    const subscriptionId = await TrainerSubscription.generateSubscriptionId();
+    const subscriptionId = await PlayersSubcriptionModel.generateSubscriptionId();
 
-    const subscription = new TrainerSubscription({
+    const subscription = new PlayersSubcriptionModel({
       subscriptionId,
       gymId: data.gymId,
       trainerId: data.trainerId,
@@ -64,7 +64,7 @@ const createTrainerSubscription = async (req, res) => {
 };
 
 // ✅ Update Trainer Subscription
-const updateTrainerSubscription = async (req, res) => {
+const updatePlayersSubcriptionPlan = async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
@@ -97,7 +97,7 @@ const updateTrainerSubscription = async (req, res) => {
       }
     }
 
-    const result = await TrainerSubscription.findByIdAndUpdate(
+    const result = await PlayersSubcriptionModel.findByIdAndUpdate(
       id,
       { $set: updateData },
       { new: true, runValidators: true }
@@ -127,7 +127,7 @@ const updateTrainerSubscription = async (req, res) => {
 };
 
 // ✅ Delete Trainer Subscription
-const deleteTrainerSubscription = async (req, res) => {
+const deletePlayersSubcriptionPlan = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -138,7 +138,7 @@ const deleteTrainerSubscription = async (req, res) => {
       });
     }
 
-    const result = await TrainerSubscription.findByIdAndDelete(id);
+    const result = await PlayersSubcriptionModel.findByIdAndDelete(id);
 
     if (!result) {
       return res.status(404).json({ 
@@ -163,7 +163,7 @@ const deleteTrainerSubscription = async (req, res) => {
 };
 
 // ✅ Get Trainer Subscription by ID
-const getTrainerSubscriptionById = async (req, res) => {
+const getPlayersSubcriptionPlanById = async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -174,7 +174,7 @@ const getTrainerSubscriptionById = async (req, res) => {
       });
     }
 
-    const subscription = await TrainerSubscription.findById(id)
+    const subscription = await PlayersSubcriptionModel.findById(id)
       .populate('gymId', 'name gymId city state')
       .populate('trainerId', 'name email userId role');
 
@@ -201,7 +201,7 @@ const getTrainerSubscriptionById = async (req, res) => {
 };
 
 // ✅ Get All Trainer Subscriptions
-const getAllTrainerSubscriptions = async (req, res) => {
+const getAllPlayersSubcriptionPlans = async (req, res) => {
   try {
     const { gymId, status, page = 1, limit = 10 } = req.query;
     
@@ -213,14 +213,14 @@ const getAllTrainerSubscriptions = async (req, res) => {
     // Pagination
     const skip = (parseInt(page) - 1) * parseInt(limit);
     
-    const subscriptions = await TrainerSubscription.find(filter)
+    const subscriptions = await PlayersSubcriptionModel.find(filter)
       .populate('gymId', 'name gymId city state')
       .populate('trainerId', 'name email userId role')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
 
-    const total = await TrainerSubscription.countDocuments(filter);
+    const total = await PlayersSubcriptionModel.countDocuments(filter);
 
     res.status(200).json({ 
       success: true, 
@@ -244,7 +244,7 @@ const getAllTrainerSubscriptions = async (req, res) => {
 };
 
 // ✅ Get Trainer Subscriptions by Gym ID
-const getTrainerSubscriptionsByGymId = async (req, res) => {
+const getPlayersSubcriptionPlansByGymId = async (req, res) => {
   try {
     const { gymId } = req.params;
     const { status, page = 1, limit = 10 } = req.query;
@@ -263,13 +263,13 @@ const getTrainerSubscriptionsByGymId = async (req, res) => {
     // Pagination
     const skip = (parseInt(page) - 1) * parseInt(limit);
     
-    const subscriptions = await TrainerSubscription.find(filter)
+    const subscriptions = await PlayersSubcriptionModel.find(filter)
       .populate('trainerId', 'name email userId role')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
 
-    const total = await TrainerSubscription.countDocuments(filter);
+    const total = await PlayersSubcriptionModel.countDocuments(filter);
 
     res.status(200).json({ 
       success: true, 
@@ -293,10 +293,10 @@ const getTrainerSubscriptionsByGymId = async (req, res) => {
 };
 
 module.exports = {
-  createTrainerSubscription,
-  updateTrainerSubscription,
-  deleteTrainerSubscription,
-  getTrainerSubscriptionById,
-  getAllTrainerSubscriptions,
-  getTrainerSubscriptionsByGymId
+  createPlayersSubcriptionPlan,
+  updatePlayersSubcriptionPlan,
+  deletePlayersSubcriptionPlan,
+  getPlayersSubcriptionPlanById,
+  getAllPlayersSubcriptionPlans,
+  getPlayersSubcriptionPlansByGymId
 };

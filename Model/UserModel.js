@@ -4,7 +4,7 @@ const userSchema = new mongoose.Schema(
   {
     role: {
       type: String,
-      enum: ["player", "trainer"],
+      enum: ["player", "trainer",'admin'],
       required: true,
     },
     userId: {
@@ -54,7 +54,7 @@ const userSchema = new mongoose.Schema(
     },
     subscriptionId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "TrainerSubscription",
+      ref: "PlayersSubcriptionPlan",
     },
     subscriptionStatus: {
       type: String,

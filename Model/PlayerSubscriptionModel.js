@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const trainerSubscriptionSchema = new mongoose.Schema(
+const PlayersSubcriptionPlanSchema = new mongoose.Schema(
   {
     subscriptionId: {
       type: String,
@@ -78,7 +78,7 @@ const trainerSubscriptionSchema = new mongoose.Schema(
 );
 
 // Generate next subscription ID
-trainerSubscriptionSchema.statics.generateSubscriptionId = async function() {
+PlayersSubcriptionPlanSchema.statics.generateSubscriptionId = async function() {
   const lastSubscription = await this.findOne().sort({ createdAt: -1 }).exec();
   let nextId = "SUB1";
   
@@ -90,4 +90,4 @@ trainerSubscriptionSchema.statics.generateSubscriptionId = async function() {
   return nextId;
 };
 
-module.exports = mongoose.model("TrainerSubscription", trainerSubscriptionSchema);
+module.exports = mongoose.model("PlayersSubcriptionPlan", PlayersSubcriptionPlanSchema);

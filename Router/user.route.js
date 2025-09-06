@@ -10,7 +10,7 @@ userRouter.post('/login',UserController.ClientLoginWeb)
 userRouter.get('/get-gymlist',GymController.GetGymList)
 
 // User Management
-userRouter.post('/insertuser',UserController.InsertUser)
+userRouter.post('/insertuser',UserController.InsertGymAdminUser)
 userRouter.post('/updateuser',UserController.EditUser)
 userRouter.get('/get-userlist',UserController.GetUserList)
 userRouter.get('/get-players-listbygymid',UserController.getGymPlayersListByGymid)
@@ -19,6 +19,6 @@ userRouter.get('/get-players-listbygymid',UserController.getGymPlayersListByGymi
 // Use /gym-owner/subscriptions for subscription management
 
 // Token Management
-userRouter.get('/refresh-token',UserController.refreshToken)
+userRouter.post('/refresh-token',UserController.refreshToken)
 
 module.exports = userRouter

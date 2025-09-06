@@ -4,7 +4,7 @@ const express=require('express')
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const userRouter= require('./Router/user.route')
-const adminRouter= require('./Router/admin.route')
+const superAdminRouter= require('./Router/admin.route')
 const apiauth= require('./Auth/apiAuth');
 const CommonApiRoutes = require('./Router/common.route');
 const app=express()
@@ -31,19 +31,9 @@ app.use('/uploads', express.static('uploads'));
 
 
 
-
-app.use('/client',(req, res, next) => {
-    if (req.path === '/refresh-token' || req.path === '/login') {
-      return next(); // skip 
-    }
-    authenticateToken(req, res, next);
-  },  
-  userRouter
-);
-
-app.use('/admin', adminRouter);
+app.use('/api/super-admin', superAdminRouter);
 app.use('/common', apiauth, CommonApiRoutes);
-app.use('/gym-owner', gymOwnerRouter  );
+app.use('/api/admin', gymOwnerRouter  );
 app.use('/upload', uploadRouter);
 
 
