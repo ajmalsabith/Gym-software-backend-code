@@ -68,13 +68,13 @@ const InsertGymAdminUser = async (req, res) => {
     const lastUser = await User.findOne().sort({ createdAt: -1 }).exec();
     let nextUserId = "USER1";
 
-    if (lastUser?.userId) {
-      const lastUserNumber = parseInt(lastUser.userId.replace("USER", ""), 10) || 0;
+    if (lastUser?.palyerid) {
+      const lastUserNumber = parseInt(lastUser.palyerid.replace("USER", ""), 10) || 0;
       nextUserId = `USER${lastUserNumber + 1}`;
     }
 
     const user = new User({
-      userId: nextUserId,
+      palyerid: nextUserId,
       role: data.role,
       name: data.name,
       email: data.email,
@@ -117,7 +117,7 @@ const EditUser = async (req, res) => {
     const data = req.body.obj;
 
     const result = await User.updateOne(
-      { userId:userid},
+      { palyerid:userid},
       { $set: data },
       { runValidators: true }
     );
@@ -257,7 +257,7 @@ const getGymPlayersListByGymid = async (req, res) => {
       return res.status(400).json({ message: "gymId is required" });
     }
 
-    const players = await User.find({ gymId, role: "player" })
+    const players = await User.find({ gymId})
       .populate("gymId", "name gymId city state")
       .populate("subscriptionId", "planName planType price duration")
       .sort({ createdAt: -1 });

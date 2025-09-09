@@ -32,7 +32,7 @@ app.use('/uploads', express.static('uploads'));
 
 
 app.use('/api/super-admin', superAdminRouter);
-app.use('/common', apiauth, CommonApiRoutes);
+app.use('/api/admincommon', apiauth, CommonApiRoutes);
 app.use('/api/admin', gymOwnerRouter  );
 app.use('/upload', uploadRouter);
 

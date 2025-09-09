@@ -12,11 +12,6 @@ const PlayersSubcriptionPlanSchema = new mongoose.Schema(
       ref: "Gym",
       required: true,
     },
-    trainerId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Users",
-      required: true,
-    },
     planName: {
       type: String,
       required: true,
@@ -24,8 +19,7 @@ const PlayersSubcriptionPlanSchema = new mongoose.Schema(
     },
     planType: {
       type: String,
-      enum: ["basic", "premium", "custom"],
-      default: "basic",
+      required: true,
     },
     price: {
       type: Number,
@@ -37,18 +31,10 @@ const PlayersSubcriptionPlanSchema = new mongoose.Schema(
       required: true,
       min: 1,
     },
-    startDate: {
-      type: Date,
-      required: true,
-    },
-    endDate: {
-      type: Date,
-      required: true,
-    },
     status: {
       type: String,
-      enum: ["active", "expired", "cancelled", "pending"],
-      default: "pending",
+      enum: ["active", "inactive", "cancelled"],
+      default: "active",
     },
     features: [{
       type: String,
@@ -61,11 +47,6 @@ const PlayersSubcriptionPlanSchema = new mongoose.Schema(
     isActive: {
       type: Boolean,
       default: true,
-    },
-    paymentStatus: {
-      type: String,
-      enum: ["pending", "completed", "failed"],
-      default: "pending",
     },
     autoRenew: {
       type: Boolean,

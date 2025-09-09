@@ -6,23 +6,14 @@ const createPlayersSubcriptionPlan = async (req, res) => {
     const data = req.body;
 
     // Validate required fields
-    if (!data.gymId || !data.trainerId || !data.planName || !data.price || !data.duration) {
+    if (!data.gymId || !data.planName || !data.price || !data.duration) {
       return res.status(400).json({ 
         success: false, 
-        message: "gymId, trainerId, planName, price, and duration are required" 
+        message: "gymId, planName, price, and duration are required" 
       });
     }
 
-    // Validate dates
-    const startDate = data.startDate ? new Date(data.startDate) : new Date();
-    const endDate = data.endDate ? new Date(data.endDate) : new Date(startDate.getTime() + (data.duration * 30 * 24 * 60 * 60 * 1000));
 
-    if (isNaN(startDate) || isNaN(endDate)) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Invalid date format" 
-      });
-    }
 
     // Generate subscription ID
     const subscriptionId = await PlayersSubcriptionModel.generateSubscriptionId();
@@ -30,18 +21,14 @@ const createPlayersSubcriptionPlan = async (req, res) => {
     const subscription = new PlayersSubcriptionModel({
       subscriptionId,
       gymId: data.gymId,
-      trainerId: data.trainerId,
       planName: data.planName,
-      planType: data.planType || "basic",
+      planType: data.planType,
       price: data.price,
       duration: data.duration,
-      startDate,
-      endDate,
-      status: data.status || "pending",
+      status: data.status,
       features: data.features || [],
       description: data.description,
       isActive: data.isActive !== undefined ? data.isActive : true,
-      paymentStatus: data.paymentStatus || "pending",
       autoRenew: data.autoRenew || false,
     });
 
@@ -49,15 +36,15 @@ const createPlayersSubcriptionPlan = async (req, res) => {
     
     res.status(201).json({ 
       success: true, 
-      message: "Trainer subscription created successfully", 
+      message: "subscription created successfully", 
       subscription: savedSubscription 
     });
 
   } catch (error) {
-    console.error("Error creating trainer subscription:", error);
+    console.error("Error creating subscription:", error);
     res.status(500).json({ 
       success: false, 
-      message: "Error creating trainer subscription", 
+      message: "Error creating subscription", 
       error: error.message 
     });
   }
@@ -76,26 +63,8 @@ const updatePlayersSubcriptionPlan = async (req, res) => {
       });
     }
 
-    // Validate dates if provided
-    if (updateData.startDate) {
-      updateData.startDate = new Date(updateData.startDate);
-      if (isNaN(updateData.startDate)) {
-        return res.status(400).json({ 
-          success: false, 
-          message: "Invalid start date format" 
-        });
-      }
-    }
 
-    if (updateData.endDate) {
-      updateData.endDate = new Date(updateData.endDate);
-      if (isNaN(updateData.endDate)) {
-        return res.status(400).json({ 
-          success: false, 
-          message: "Invalid end date format" 
-        });
-      }
-    }
+
 
     const result = await PlayersSubcriptionModel.findByIdAndUpdate(
       id,
@@ -106,21 +75,21 @@ const updatePlayersSubcriptionPlan = async (req, res) => {
     if (!result) {
       return res.status(404).json({ 
         success: false, 
-        message: "Trainer subscription not found" 
+        message: " subscription not found" 
       });
     }
 
     res.status(200).json({ 
       success: true, 
-      message: "Trainer subscription updated successfully", 
+      message: "subscription updated successfully", 
       subscription: result 
     });
 
   } catch (error) {
-    console.error("Error updating trainer subscription:", error);
+    console.error("Error updating subscription:", error);
     res.status(500).json({ 
       success: false, 
-      message: "Error updating trainer subscription", 
+      message: "Error updating subscription", 
       error: error.message 
     });
   }
@@ -143,7 +112,7 @@ const deletePlayersSubcriptionPlan = async (req, res) => {
     if (!result) {
       return res.status(404).json({ 
         success: false, 
-        message: "Trainer subscription not found" 
+        message: " subscription not found" 
       });
     }
 
@@ -176,12 +145,11 @@ const getPlayersSubcriptionPlanById = async (req, res) => {
 
     const subscription = await PlayersSubcriptionModel.findById(id)
       .populate('gymId', 'name gymId city state')
-      .populate('trainerId', 'name email userId role');
 
     if (!subscription) {
       return res.status(404).json({ 
         success: false, 
-        message: "Trainer subscription not found" 
+        message: " subscription not found" 
       });
     }
 
@@ -191,10 +159,10 @@ const getPlayersSubcriptionPlanById = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Error fetching trainer subscription:", error);
+    console.error("Error fetching subscription:", error);
     res.status(500).json({ 
       success: false, 
-      message: "Error fetching trainer subscription", 
+      message: "Error fetching subscription", 
       error: error.message 
     });
   }
@@ -215,7 +183,6 @@ const getAllPlayersSubcriptionPlans = async (req, res) => {
     
     const subscriptions = await PlayersSubcriptionModel.find(filter)
       .populate('gymId', 'name gymId city state')
-      .populate('trainerId', 'name email userId role')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
