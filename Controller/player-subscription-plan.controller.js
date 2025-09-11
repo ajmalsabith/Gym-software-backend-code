@@ -231,7 +231,6 @@ const getPlayersSubcriptionPlansByGymId = async (req, res) => {
     const skip = (parseInt(page) - 1) * parseInt(limit);
     
     const subscriptions = await PlayersSubcriptionModel.find(filter)
-      .populate('trainerId', 'name email userId role')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));

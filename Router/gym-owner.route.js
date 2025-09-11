@@ -3,6 +3,7 @@ const gymOwnerRouter = express()
 const GymAdminController= require('../Controller/user.controller')
 const PlayersSubcriptionPlanController = require('../Controller/player-subscription-plan.controller')
 const TrainerController = require('../Controller/trainer.controller')
+const PaymentHistroyController = require('../Controller/paymentHistoryControlloer')
 const authenticateGymOwner = require('../Auth/gymOwnerAuth')
 
 // Trainer Authentication (Public routes)
@@ -17,8 +18,10 @@ gymOwnerRouter.use(authenticateGymOwner);
 gymOwnerRouter.get('/profile', GymAdminController.getCurrentUser);
 
 // Gym Player Management
-gymOwnerRouter.post('/players', GymAdminController.createGymPlayer);
+gymOwnerRouter.post('/playersinsert', GymAdminController.createGymPlayer);
+gymOwnerRouter.put('/playersupdate/:id', GymAdminController.updateGymPlayer);
 gymOwnerRouter.get('/players', GymAdminController.getGymPlayersListByGymid);
+gymOwnerRouter.get('/playerbyid', GymAdminController.GetUserById);
 
 // Gym Trainer Management
 gymOwnerRouter.post('/trainers', TrainerController.createGymTrainer);
@@ -36,5 +39,12 @@ gymOwnerRouter.delete('/subscriptions/:id', PlayersSubcriptionPlanController.del
 
 // Get subscriptions by specific gym
 gymOwnerRouter.get('/gym/:gymId/subscriptions', PlayersSubcriptionPlanController.getPlayersSubcriptionPlansByGymId);
+
+
+// payment history 
+
+gymOwnerRouter.post("/insertpayment", PaymentHistroyController.createPayment);
+gymOwnerRouter.put("/updatepayment/:id", PaymentHistroyController.updatePayment);
+gymOwnerRouter.get("/getpayment/:gymId", PaymentHistroyController.getPaymentsByGym);
 
 module.exports = gymOwnerRouter;

@@ -68,19 +68,20 @@ const InsertGymAdminUser = async (req, res) => {
     const lastUser = await User.findOne().sort({ createdAt: -1 }).exec();
     let nextUserId = "USER1";
 
-    if (lastUser?.palyerid) {
-      const lastUserNumber = parseInt(lastUser.palyerid.replace("USER", ""), 10) || 0;
+    if (lastUser?.playerid) {
+      const lastUserNumber = parseInt(lastUser.playerid.replace("USER", ""), 10) || 0;
       nextUserId = `USER${lastUserNumber + 1}`;
     }
 
     const user = new User({
-      palyerid: nextUserId,
+      playerid: nextUserId,
       role: data.role,
       name: data.name,
       email: data.email,
       password: data.password, // ⚠️ You may want to hash with bcrypt
       phone: data.phone,
       gender: data.gender,
+      age: data.age,
       dob: data.dob ? new Date(data.dob) : null,
         line1: data?.line1,
         city: data?.city,
@@ -117,7 +118,7 @@ const EditUser = async (req, res) => {
     const data = req.body.obj;
 
     const result = await User.updateOne(
-      { palyerid:userid},
+      { playerid:userid},
       { $set: data },
       { runValidators: true }
     );
@@ -150,19 +151,18 @@ const GetUserList = async (req, res) => {
 
 const GetUserById = async (req, res) => {
   try {
-    const { id } = req.body; // get id from body
-
+    const { id } = req.query; // ge
     if (!id) {
       return res.status(400).json({ message: "User ID is required in body" });
     }
 
-    const Users = await User.findById(id);
+    const Users = await User.findById(id).populate("gymId").populate("subscriptionId")
 
     if (!Users) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    res.status(200).json(Users);
+    res.status(200).json({Users:Users});
   } catch (error) {
     console.error("Failed to get User by ID:", error);
     res.status(500).json({ message: "Error fetching User details", error: error.message });
@@ -258,8 +258,8 @@ const getGymPlayersListByGymid = async (req, res) => {
     }
 
     const players = await User.find({ gymId})
-      .populate("gymId", "name gymId city state")
-      .populate("subscriptionId", "planName planType price duration")
+      .populate("gymId")
+      .populate("subscriptionId")
       .sort({ createdAt: -1 });
 
     res.status(200).json({ success: true, players });
@@ -274,11 +274,13 @@ const createGymPlayer = async (req, res) => {
   try {
     const data = req.body;
 
+    
+
     // Validate required fields
-    if (!data.name || !data.email || !data.phone || !data.gymId || !data.subscriptionId) {
+    if (!data.name || !data.email || !data.phone || !data.gymId ) {
       return res.status(400).json({ 
         success: false, 
-        message: "name, email, phone, gymId, and subscriptionId are required" 
+        message: "name, email, phone, gymId are required" 
       });
     }
 
@@ -291,21 +293,14 @@ const createGymPlayer = async (req, res) => {
       });
     }
 
-    // Get subscription details to set dates and status
-    const subscription = await require("../Model/PlayerSubscriptionModel").findById(data.subscriptionId);
-    if (!subscription) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Invalid subscription ID" 
-      });
-    }
 
     // Generate next userId
     const lastUser = await User.findOne().sort({ createdAt: -1 }).exec();
+    
     let nextUserId = "USER1";
 
-    if (lastUser?.userId) {
-      const lastUserNumber = parseInt(lastUser.userId.replace("USER", ""), 10) || 0;
+    if (lastUser?.playerid) {
+      const lastUserNumber = parseInt(lastUser.playerid.replace("USER", ""), 10) || 0;
       nextUserId = `USER${lastUserNumber + 1}`;
     }
 
@@ -322,13 +317,13 @@ const createGymPlayer = async (req, res) => {
     }
 
     const user = new User({
-      userId: nextUserId,
-      role: "player",
+      playerid: nextUserId,
+      role: data.role,
       name: data.name,
       email: data.email,
       password: data.password || "defaultPassword123", // You may want to generate a random password
       phone: data.phone,
-      age: age || data.age,
+      age: data.age || age,
       gender: data.gender,
       dob: data.dob ? new Date(data.dob) : null,
       line1: data?.line1,
@@ -338,10 +333,6 @@ const createGymPlayer = async (req, res) => {
       country: data?.country,
       zip: data?.zip,
       gymId: data.gymId,
-      subscriptionId: data.subscriptionId,
-      subscriptionStatus: subscription.status,
-      subscriptionStartDate: subscription.startDate,
-      subscriptionEndDate: subscription.endDate,
       IsStatus: data?.IsStatus || "active",
       photo: data?.photo,
     });
@@ -350,8 +341,6 @@ const createGymPlayer = async (req, res) => {
     
     // Populate the saved user with gym and subscription details
     const populatedUser = await User.findById(savedUser._id)
-      .populate("gymId", "name gymId city state")
-      .populate("subscriptionId", "planName planType price duration");
 
     res.status(201).json({ 
       success: true, 
@@ -368,6 +357,56 @@ const createGymPlayer = async (req, res) => {
     });
   }
 };
+
+
+const updateGymPlayer = async (req, res) => {
+  try {
+    const { id } = req.params; // playerId
+    const data = req.body;
+    
+
+    const player = await User.findById(id);
+    if (!player) {
+      return res.status(404).json({
+        success: false,
+        message: "Player not found",
+      });
+    }
+
+    // If subscriptionId is provided, update subscription details
+    // if (data.subscriptionId) {
+    //   const subscription = await PlayerSubscription.findById(data.subscriptionId);
+    //   if (!subscription) {
+    //     return res.status(400).json({
+    //       success: false,
+    //       message: "Invalid subscription ID",
+    //     });
+    //   }
+
+    //   data.subscriptionStatus = subscription.status;
+    //   data.subscriptionStartDate = subscription.startDate;
+    //   data.subscriptionEndDate = subscription.endDate;
+    // }
+
+    // Update player
+    const updatedPlayer = await User.findByIdAndUpdate(id, data, {
+      new: true,
+    })
+    res.status(200).json({
+      success: true,
+      message: "Player updated successfully",
+      player: updatedPlayer,
+    });
+  } catch (error) {
+    console.error("Error updating player:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error updating player",
+      error: error.message,
+    });
+  }
+};
+
 
 // Logout function to revoke refresh token
 const logout = (req, res) => {
@@ -390,7 +429,7 @@ const logout = (req, res) => {
 const getCurrentUser = async (req, res) => {
   try {
     const user = await User.findById(req.userId)
-      .populate('gymId', 'name gymId city state')
+      .populate('gymId')
       .select('-password'); // Exclude password from response
 
     if (!user) {
@@ -424,5 +463,6 @@ module.exports = {
      createGymPlayer,
      refreshToken,
      logout,
-     getCurrentUser
+     getCurrentUser,
+     updateGymPlayer
  };

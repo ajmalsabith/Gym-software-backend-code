@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema(
       enum: ["player", "trainer",'admin'],
       required: true,
     },
-    palyerid: {
+    playerid: {
       type: String,
       required: true,
     },
@@ -54,12 +54,12 @@ const userSchema = new mongoose.Schema(
     },
     subscriptionId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "PlayersSubcriptionPlan",
+      ref: "Payment",
       required:false
     },
     subscriptionStatus: {
       type: String,
-      enum: ["active", "expired", "cancelled", "pending"],
+      enum: ["active", "expired", "cancelled", "pending","partially_paid"],
       default: "pending",
     },
     subscriptionStartDate: {
