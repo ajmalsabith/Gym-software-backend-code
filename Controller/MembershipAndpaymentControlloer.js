@@ -82,7 +82,7 @@ const updateMembership = async (req, res) => {
   session.startTransaction();
   try {
     const { id } = req.params;
-    const { paidAmount = 0, paymentType, transactionId, notes } = req.body;
+    const { paidAmount = 0, paymentType, transactionId, notes,payAmount } = req.body;
 
     const membership = await Membership.findById(id).session(session);
     if (!membership) {
@@ -121,7 +121,7 @@ const updateMembership = async (req, res) => {
         gymId: membership.gymId,
         membershipId: membership._id,
         playerId: membership.playerId,
-        amount: paidAmount,
+        amount: payAmount,
         date: new Date(),
         paymentType,
         transactionId,
@@ -175,7 +175,8 @@ const getPaymentsByGym = async (req, res) => {
   try {
     const { gymId } = req.params;
     const payments = await Payment.find({ gymId })
-      .populate("playerId", "name email")
+      .populate("playerId")
+      .populate("gymId")
       .populate("membershipId", "planId totalAmount paidAmount balance status");
 
     res.status(200).json({
@@ -197,7 +198,8 @@ const getMembershipByPlayerId = async (req, res) => {
 
     const memberships = await Membership.find({ playerId })
       .populate("planId")
-      .populate("playerId", "name email")
+      .populate("gymId")
+      .populate("playerId")
       .lean();
 
     // Attach payments for each membership
