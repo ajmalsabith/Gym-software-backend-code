@@ -1,45 +1,48 @@
 const mongoose = require("mongoose");
 
-const paymentSchema = new mongoose.Schema(
-  {
-    gymId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Gym",
-      required: true,
-    },
-    playerId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Users",
-      required: true,
-    },
-    planId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "PlayersSubcriptionPlan",
-      required: true,
-    },
-
-    startDate: { type: Date, required: true },
-    endDate: { type: Date, required: true },
-
-    totalAmount: { type: Number, required: true },
-    paidAmount: { type: Number, required: true, default: 0 },
-    balanceAmount: { type: Number, required: true, default: 0 },
-
-    dueDate: { type: Date },
-    paymentType: {
-      type: String,
-      enum: ["cash", "card", "upi", "bank", "other"],
-      required: true,
-    },
-    paymentStatus: {
-      type: String,
-      enum: ["paid", "partially_paid", "pending", "failed", "refunded"],
-      default: "pending",
-    },
-    transactionId: { type: String },
-    notes: { type: String },
+const PaymentSchema = new mongoose.Schema({
+  gymId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Gym",
+    required: true,
   },
-  { timestamps: true } // ✅ createdAt & updatedAt auto
-);
+  membershipId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Memberships",
+    required: true,
+  },
+  playerId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Users",
+    required: true,
+  },
+  amount: {
+    type: Number,
+    required: true,
+  },
+  date: {
+    type: Date,
+    default: Date.now,
+  },
+  paymentType: {
+    type: String,
+    enum: ["cash", "card", "upi", "bank_transfer"],
+    required: true,
+  },
+  transactionId: {
+    type: String,
+  },
+  notes: {
+    type: String,
+  },
+  status: {
+    type: String,
+    enum: ["paid", "failed"],
+    default: "paid",
+  },
+}, {
+  timestamps: true,
+});
 
-module.exports = mongoose.model("Payment", paymentSchema);
+
+module.exports= mongoose.model("Payment", PaymentSchema);

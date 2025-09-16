@@ -54,7 +54,7 @@ const userSchema = new mongoose.Schema(
     },
     subscriptionId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Payment",
+      ref: "Memberships",
       required:false
     },
     subscriptionStatus: {

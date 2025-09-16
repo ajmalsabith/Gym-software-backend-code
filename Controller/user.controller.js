@@ -1,5 +1,7 @@
 const User = require("../Model/UserModel");
 const jwt = require("jsonwebtoken");
+const Membership = require("../Model/AssignMembershipModel");
+
 
 const JWT_SECRET = process.env.AccessSecret || 'fallback_secret_key_for_development';    
 const REFRESH_SECRET = process.env.RefreshSecret || 'fallback_refresh_secret_key_for_development';  
@@ -256,6 +258,8 @@ const getGymPlayersListByGymid = async (req, res) => {
     if (!gymId) {
       return res.status(400).json({ message: "gymId is required" });
     }
+
+    await Membership.find
 
     const players = await User.find({ gymId})
       .populate("gymId")
