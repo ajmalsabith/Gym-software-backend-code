@@ -1,5 +1,6 @@
 const User = require("../Model/UserModel");
 
+
 // ✅ Create Gym Trainer
 const createGymTrainer = async (req, res) => {
   try {
@@ -24,11 +25,11 @@ const createGymTrainer = async (req, res) => {
 
     // Generate next userId
     const lastUser = await User.findOne().sort({ createdAt: -1 }).exec();
-    let nextUserId = "USER1";
+    let nextUserId = "TNR1";
 
-    if (lastUser?.userId) {
-      const lastUserNumber = parseInt(lastUser.userId.replace("USER", ""), 10) || 0;
-      nextUserId = `USER${lastUserNumber + 1}`;
+    if (lastUser?.playerid) {
+      const lastUserNumber = parseInt(lastUser.playerid.replace("TNR", ""), 10) || 0;
+      nextUserId = `TNR${lastUserNumber + 1}`;
     }
 
     // Calculate age from DOB if provided
@@ -44,7 +45,7 @@ const createGymTrainer = async (req, res) => {
     }
 
     const trainer = new User({
-      userId: nextUserId,
+      playerid: nextUserId,
       role: "trainer",
       name: data.name,
       email: data.email,

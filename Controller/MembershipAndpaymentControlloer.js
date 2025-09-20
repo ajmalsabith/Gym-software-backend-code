@@ -3,6 +3,7 @@ const Payment = require("../Model/PaymentHistoryModel");
 const User = require("../Model/UserModel");
 
 
+
 // Create Membership + Payment
 const createMembership = async (req, res) => {
   const session = await Membership.startSession();
@@ -82,7 +83,7 @@ const updateMembership = async (req, res) => {
   session.startTransaction();
   try {
     const { id } = req.params;
-    const { paidAmount = 0, paymentType, transactionId, notes,payAmount } = req.body;
+    const { paidAmount = 0, paymentType, transactionId, notes,payAmount,dueDate } = req.body;
 
     const membership = await Membership.findById(id).session(session);
     if (!membership) {
@@ -91,6 +92,7 @@ const updateMembership = async (req, res) => {
 
     // 🔹 Update membership financials
     membership.paidAmount = paidAmount;
+    membership.dueDate = dueDate
     membership.balance = membership.totalAmount - membership.paidAmount;
     membership.status =
       membership.paidAmount >= membership.totalAmount
@@ -170,7 +172,7 @@ const updatePayment = async (req, res) => {
   }
 };
 
-// Get all payments for a gym
+// Get all payments for a gym                                     
 const getPaymentsByGym = async (req, res) => {
   try {
     const { gymId } = req.params;
@@ -225,10 +227,89 @@ const getMembershipByPlayerId = async (req, res) => {
   }
 };
 
+
+const ClearMembershipById = async (req, res) => {
+  try {
+    const { id, incPayment } = req.params;
+
+    // Find the membership by ID
+    const membership = await Membership.findById(id).populate("playerId");
+
+    if (!membership) {
+      return res.status(404).json({
+        success: false,
+        message: "Membership not found",
+      });
+    }
+
+    // Update player details
+    await User.findByIdAndUpdate(
+      membership.playerId._id,
+      { subscriptionId: null, subscriptionStatus: "pending" },
+      { new: true }
+    );
+
+    // Conditionally delete payment history
+    if (incPayment === "true") { // params are strings
+      await Payment.deleteMany({ membershipId: id });
+    }
+
+    // Delete the membership
+    await Membership.findByIdAndDelete(id);
+
+    // Send response after all operations
+    res.status(200).json({
+      success: true,
+      message: "Membership cleared, player updated" + (incPayment === "true" ? " and payments deleted" : ""),
+    });
+
+  } catch (error) {
+    console.error("Error clearing membership:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error clearing membership",
+      error: error.message,
+    });
+  }
+};
+
+
+
+const deletePaymentById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const payment = await Payment.findById(id);
+    if (!payment) {
+      return res.status(404).json({
+        success: false,
+        message: 'Payment not found',
+      });
+    }
+
+    await Payment.findByIdAndDelete(id);
+
+    res.status(200).json({
+      success: true,
+      message: 'Payment deleted successfully',
+    });
+  } catch (error) {
+    console.error('Error deleting payment:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error deleting payment',
+      error: error.message,
+    });
+  }
+};
+
+
 module.exports = {
   createMembership,
   updateMembership,
   updatePayment,
   getPaymentsByGym,
-  getMembershipByPlayerId
+  getMembershipByPlayerId,
+  ClearMembershipById,
+  deletePaymentById
 };

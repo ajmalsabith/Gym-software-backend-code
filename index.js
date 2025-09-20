@@ -13,6 +13,8 @@ const authenticateToken = require('./Auth/tokenAuth');
 
 const gymOwnerRouter = require('./Router/gym-owner.route');
 const uploadRouter = require('./Router/upload.route');
+const cron = require('node-cron');
+const CronController = require('./Controller/CronController');
 
 
 app.use(cors({
@@ -38,7 +40,23 @@ app.use('/upload', uploadRouter);
 
 
 mongoose.connect(process.env.mongodburinew)
-.then(() => console.log('Connected to MongoDB'))
+.then(() =>{ 
+ console.log('Connected to MongoDB')
+  cron.schedule('0 5 * * *', () => {
+  // 6:00 AM job
+  CronController.checkExpiredMemberships().catch(err =>
+    console.error('Cron job error:', err)
+  );
+});
+
+cron.schedule('0 16 * * *', () => {
+  // 5:23 PM job
+  CronController.checkExpiredMemberships().catch(err =>
+    console.error('Cron job error:', err)
+  );
+});
+
+})
 .catch(err => console.error('Database connection error:', err));
 
 

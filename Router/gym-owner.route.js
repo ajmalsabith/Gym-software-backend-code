@@ -4,6 +4,7 @@ const GymAdminController= require('../Controller/user.controller')
 const PlayersSubcriptionPlanController = require('../Controller/player-subscription-plan.controller')
 const TrainerController = require('../Controller/trainer.controller')
 const PaymentHistroyController = require('../Controller/MembershipAndpaymentControlloer')
+const dashboardController = require('../Controller/dashboardAnaylaticsController')
 const authenticateGymOwner = require('../Auth/gymOwnerAuth')
 
 // Trainer Authentication (Public routes)
@@ -48,5 +49,18 @@ gymOwnerRouter.put("/UpdatemembershipAndpayment/:id", PaymentHistroyController.u
 gymOwnerRouter.put("/Updatepayment/:id", PaymentHistroyController.updatePayment);
 gymOwnerRouter.get("/getpayments/:gymId", PaymentHistroyController.getPaymentsByGym);
 gymOwnerRouter.get("/getmembership/:playerid", PaymentHistroyController.getMembershipByPlayerId);
+gymOwnerRouter.put("/clearMembership/:id/:incPayment", PaymentHistroyController.ClearMembershipById);
+gymOwnerRouter.delete("/deletepayment/:id", PaymentHistroyController.deletePaymentById);
+
+
+// dashboard values
+gymOwnerRouter.get("/dueDatetoday/:gymId", dashboardController.getBalanceDueToday);
+gymOwnerRouter.get("/expiringMemberships/:gymId", dashboardController.getExpiringMemberships);
+gymOwnerRouter.get("/membershipDashboard/:gymId", dashboardController.getMembershipDashboard);
+gymOwnerRouter.get("/mostePopularplans/:gymId", dashboardController.getMostPopularPlans);
+gymOwnerRouter.get("/paymentDashbaord/:gymId", dashboardController.getPaymentDashboard);
+gymOwnerRouter.get("/lastpaymentsDashbaord/:gymId", dashboardController.getLast10Payments)
+
+
 
 module.exports = gymOwnerRouter;
