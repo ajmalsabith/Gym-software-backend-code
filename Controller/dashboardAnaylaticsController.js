@@ -249,13 +249,17 @@ const getLast10Payments = async (req, res) => {
   try {
     const { gymId } = req.params;
 
-    // Fetch the latest 10 payments for this gym
-    const last10Payments = await Payment.find({
-      gymId: new mongoose.Types.ObjectId(gymId)
-    })
-    .sort({ createdAt: -1 }) // latest first
-    .limit(10).populate('playerId', 'name phone photo'); // populate fields you want from the User/Player
+    // Get 24 hours ago
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
+    // Fetch the latest 10 payments for this gym within last 24 hours
+    const last10Payments = await Payment.find({
+      gymId: new mongoose.Types.ObjectId(gymId),
+      createdAt: { $gte: twentyFourHoursAgo } // only payments in last 24 hours
+    })
+      .sort({ createdAt: -1 }) // latest first
+      .limit(10)
+      .populate('playerId', 'name phone photo'); // populate fields you want from the User/Player
 
     res.status(200).json({
       success: true,
@@ -268,6 +272,7 @@ const getLast10Payments = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 module.exports = { getLast10Payments };
 

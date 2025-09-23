@@ -207,7 +207,8 @@ const GymAdminLogin = async (req, res) => {
         id: user._id,
         email: user.email,
         role: user.role,
-        gym: user.gymId
+        gym: user.gymId,
+        gymLogo: user.gymId?.logo
       }
     });
   } catch (error) {
@@ -261,7 +262,7 @@ const getGymPlayersListByGymid = async (req, res) => {
 
     await Membership.find
 
-    const players = await User.find({ gymId})
+    const players = await User.find({gymId,role:"player"})
       .populate("gymId")
       .populate("subscriptionId")
       .sort({ createdAt: -1 });

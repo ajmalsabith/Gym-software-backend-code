@@ -5,6 +5,7 @@ const PlayersSubcriptionPlanController = require('../Controller/player-subscript
 const TrainerController = require('../Controller/trainer.controller')
 const PaymentHistroyController = require('../Controller/MembershipAndpaymentControlloer')
 const dashboardController = require('../Controller/dashboardAnaylaticsController')
+const AttendanceController = require('../Controller/AttendanceController')
 const authenticateGymOwner = require('../Auth/gymOwnerAuth')
 
 // Trainer Authentication (Public routes)
@@ -60,6 +61,26 @@ gymOwnerRouter.get("/membershipDashboard/:gymId", dashboardController.getMembers
 gymOwnerRouter.get("/mostePopularplans/:gymId", dashboardController.getMostPopularPlans);
 gymOwnerRouter.get("/paymentDashbaord/:gymId", dashboardController.getPaymentDashboard);
 gymOwnerRouter.get("/lastpaymentsDashbaord/:gymId", dashboardController.getLast10Payments)
+
+
+// attendance 
+
+gymOwnerRouter.post("/attentance/present", AttendanceController.markPresent); // values from req.body
+gymOwnerRouter.post("/attentance/absent", AttendanceController.markAbsent);   // values from req.body
+
+// GET routes
+gymOwnerRouter.get("/attentance/frequent-absentees/:gymId", AttendanceController.getFrequentAbsentees); // get frequent absentees
+
+// GET presents by gymId and optional date range
+gymOwnerRouter.get("/attentance/presents", AttendanceController.getPresents); 
+// GET absents by gymId and optional date range
+gymOwnerRouter.get("/attentance/absents", AttendanceController.getAbsents);
+
+
+// PUT route for marking absents for today (values from params)
+gymOwnerRouter.put("/attentance/absents/today/:gymId", AttendanceController.markAbsentsForToday);
+gymOwnerRouter.delete("/attentance/present/:id", AttendanceController.deletePresent);
+gymOwnerRouter.delete("/attentance/absent/:id", AttendanceController.deleteAbsent);
 
 
 

@@ -64,3 +64,7 @@ app.listen(3400,()=>{
     console.log('server running on port 3400...');
     
 })
+
+// app.listen(PORT, '0.0.0.0', () => {
+//   console.log(`Server running at http://192.168.1.2:${PORT}`);
+// });
