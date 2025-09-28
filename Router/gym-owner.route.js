@@ -52,6 +52,7 @@ gymOwnerRouter.get("/getpayments/:gymId", PaymentHistroyController.getPaymentsBy
 gymOwnerRouter.get("/getmembership/:playerid", PaymentHistroyController.getMembershipByPlayerId);
 gymOwnerRouter.put("/clearMembership/:id/:incPayment", PaymentHistroyController.ClearMembershipById);
 gymOwnerRouter.delete("/deletepayment/:id", PaymentHistroyController.deletePaymentById);
+gymOwnerRouter.post("/createcustompayment", PaymentHistroyController.CreateCustomePayment)
 
 
 // dashboard values

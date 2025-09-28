@@ -56,6 +56,7 @@ const createMembership = async (req, res) => {
         transactionId,
         notes,
         status: "paid",
+        paymentFor:"Membership"
       });
       await payment.save({ session });
     }
@@ -129,6 +130,7 @@ const updateMembership = async (req, res) => {
         transactionId,
         notes,
         status: "paid",
+        paymentFor:"Membership"
       });
       await payment.save({ session });
     }
@@ -304,6 +306,51 @@ const deletePaymentById = async (req, res) => {
 };
 
 
+
+
+const CreateCustomePayment = async (req, res) => {
+  try {
+    const { gymId, playerId, payAmount, paymentType, transactionId, notes, paymentFor } = req.body;
+
+    // ✅ Validation
+    if (!gymId || !playerId || !payAmount || !paymentType || !paymentFor) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields: gymId, playerId, payAmount, paymentType, paymentFor are required.",
+      });
+    }
+
+    const payment = new Payment({
+      gymId,
+      playerId,
+      amount: payAmount,
+      date: new Date(),
+      paymentType,
+      transactionId,
+      notes,
+      status: "paid",
+      paymentFor,
+    });
+
+    await payment.save(); // removed { session } unless you are using a transaction
+
+    res.status(200).json({
+      success: true,
+      message: "Payment recorded successfully",
+      data: payment,
+    });
+  } catch (error) {
+    console.error("Error creating payment:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error creating payment",
+      error: error.message,
+    });
+  }
+};
+
+
+
 module.exports = {
   createMembership,
   updateMembership,
@@ -311,5 +358,6 @@ module.exports = {
   getPaymentsByGym,
   getMembershipByPlayerId,
   ClearMembershipById,
-  deletePaymentById
+  deletePaymentById,
+  CreateCustomePayment
 };

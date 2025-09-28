@@ -9,7 +9,6 @@ const PaymentSchema = new mongoose.Schema({
   membershipId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Memberships",
-    required: true,
   },
   playerId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -28,6 +27,10 @@ const PaymentSchema = new mongoose.Schema({
     type: String,
     enum: ["cash", "card", "upi", "bank_transfer"],
     required: true,
+  },
+  paymentFor:{
+    type: String,
+    required:true
   },
   transactionId: {
     type: String,
