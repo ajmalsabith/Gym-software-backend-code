@@ -118,6 +118,7 @@ CommonApiRoutes.post('/sendmail', async (req, res) => {
     const { sub, mail, cc, attach, html } = req.body;
     const attachArray = [];
 
+
     if (req.body) {
         attach.forEach(element => {
             // Only handle Blob URL attachments
